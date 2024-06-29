@@ -1,5 +1,6 @@
 ﻿using NLua;
 using NLua.Exceptions;
+using System.Reflection;
 
 namespace Maiswan.Marble;
 
@@ -25,23 +26,39 @@ internal class MarbleGame
         this.teams = new(teams);
 
         // basic sandboxing
-        if (lua.IsExecuting) { return; }
+        if (!lua.IsExecuting) { InitializeLuaSandbox(); }
+    }
 
-        lua.DoString("import = function () end"); 
+    private void InitializeLuaSandbox()
+    {
         lua["MarbleGame"] = this;
+
+        // Execute Sandbox.lua as an embdded resource
+        Assembly executing = Assembly.GetExecutingAssembly();
+        string? name = executing.GetName().Name;
+
+        using Stream? stream = executing.GetManifestResourceStream($"{name}.Sandbox.lua");
+        if (stream is null) { return; }
+
+        StreamReader streamReader = new(stream);
+        string sandbox = streamReader.ReadToEnd();
+        lua.DoString(sandbox);
     }
 
     public void Run()
     {
-
         if (lua.IsExecuting) { return; }
 
         RaiseGameChangedEvent(false);
+
+        // Invoke user script through sandbox
         try
         {
-            lua.DoFile(LuaFile);
+            string user = File.ReadAllText(LuaFile);
+            LuaFunction sandbox = (LuaFunction)lua["run_sandbox"];
+            sandbox.Call(user);
         }
-        catch (LuaScriptException) { }
+        catch ( LuaException ) { }
 
         RaiseGameChangedEvent(true);
     }
