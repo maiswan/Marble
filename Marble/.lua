@@ -1,12 +1,6 @@
 lastIndex = -1
 index = -1
 
--- Initialize PRNG
-math.randomseed(os.time())
-math.random()
-math.random()
-math.random()
-
 for i = 0,4,1 do
 	MarbleGame:Multiply(0.8, 1.2)
 end
