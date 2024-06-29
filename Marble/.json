@@ -1,0 +1,47 @@
+{
+  "Options": {
+    "DelayBetweenRounds": 150,
+    "DisplayPercentage": false,
+    "DisplayZero": false,
+    "DeathIfFewer": 3,
+    "ScriptPath": ".lua"
+  },
+
+  "Teams": [
+    {
+      "Name": "Magenta",
+      "Color": "Magenta",
+      "Population": 100
+    },
+    {
+      "Name": "Red",
+      "Color": "Red",
+      "Population": 100
+    },
+    {
+      "Name": "Blue",
+      "Color": "Blue",
+      "Population": 100
+    },
+    {
+      "Name": "Cyan",
+      "Color": "Cyan",
+      "Population": 100
+    },
+    {
+      "Name": "Yellow",
+      "Color": "Yellow",
+      "Population": 100
+    },
+    {
+      "Name": "DarkYellow",
+      "Color": "DarkYellow",
+      "Population": 100
+    },
+    {
+      "Name": "Green",
+      "Color": "Green",
+      "Population": 100
+    }
+  ]
+}
