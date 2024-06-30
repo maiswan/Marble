@@ -21,9 +21,7 @@ internal class Program
     private static ConfigRoot GetConfigFromJsonPath(string path)
     {
         string json = File.ReadAllText(path);
-        ConfigRoot config = JsonSerializer.Deserialize<ConfigRoot>(json) ?? new();
-
-        return config;
+        return JsonSerializer.Deserialize<ConfigRoot>(json) ?? new();
     }
 
     static void Main(string[] args)
@@ -31,13 +29,12 @@ internal class Program
         string path = GetJsonPath(args);
         ConfigRoot config = GetConfigFromJsonPath(path);
 
-        MarbleGameView view = new(config.Teams, config.Options.ScriptPath)
+        new MarbleGameView(config.Teams, config.Options.ScriptPath)
         {
             DeathIfFewer = config.Options.DeathIfFewer,
             DelayBetweenRounds = config.Options.DelayBetweenRounds,
             DisplayPercentage = config.Options.DisplayPercentage,
             DisplayZero = config.Options.DisplayZero,
-        };
-        view.Run();
+        }.Run();
     }
 }
