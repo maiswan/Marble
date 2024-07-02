@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Maiswan.Marble;
 
-internal class MarbleGame(IEnumerable<Team> teams)
+public class MarbleGame(IEnumerable<Team> teams)
 {
     public int DeathIfFewer { get; set; }
     public event EventHandler<MarbleGameChangedEventArgs>? GameStepped;
