@@ -3,7 +3,7 @@ namespace Maiswan.Marble;
 internal class MarbleGameView
 {
     private int delayBetweenRounds;
-    public int DelayBetweenRounds
+    internal int DelayBetweenRounds
     {
         get => delayBetweenRounds;
         set
@@ -14,7 +14,7 @@ internal class MarbleGameView
     }
 
     private bool displayPercentage;
-    public bool DisplayPercentage
+    internal bool DisplayPercentage
     {
         get => displayPercentage;
         set
@@ -25,7 +25,7 @@ internal class MarbleGameView
     }
 
     private bool displayZero;
-    public bool DisplayZero
+    internal bool DisplayZero
     {
         get => displayZero;
         set
@@ -36,7 +36,7 @@ internal class MarbleGameView
     }
     
     private int deathIfFewer;
-    public int DeathIfFewer
+    internal int DeathIfFewer
     {
         get => deathIfFewer;
         set
@@ -50,7 +50,7 @@ internal class MarbleGameView
 
     private readonly MarbleGame game;
 
-    public MarbleGameView(IEnumerable<Team> teams, string scriptPath)
+    internal MarbleGameView(IEnumerable<Team> teams, string scriptPath)
     {
         game = new(teams)
         {
@@ -62,7 +62,7 @@ internal class MarbleGameView
         UpdateWriteFormat();
     }
 
-    public void Run()
+    internal void Run()
     {
         ConsoleColor originalColor = Console.ForegroundColor;
         game.Run();

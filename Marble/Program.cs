@@ -24,7 +24,7 @@ internal class Program
         return JsonSerializer.Deserialize<ConfigRoot>(json) ?? new();
     }
 
-    static void Main(string[] args)
+    internal static void Main(string[] args)
     {
         string path = GetJsonPath(args);
         ConfigRoot config = GetConfigFromJsonPath(path);
