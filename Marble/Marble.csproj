@@ -7,6 +7,12 @@
     <Nullable>enable</Nullable>
     <AssemblyName>Maiswan.$(MSBuildProjectName)</AssemblyName>
     <RootNamespace>Maiswan.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+    <Authors>Maiswan</Authors>
+    <Company>Maiswan</Company>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/maiswan/Marble</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +23,13 @@
     <EmbeddedResource Include="Sandbox.lua">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
