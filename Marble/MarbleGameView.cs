@@ -50,6 +50,8 @@ internal class MarbleGameView
 
     private readonly MarbleGame game;
 
+    private ConsoleColor originalColor;
+
     internal MarbleGameView(IEnumerable<Team> teams, string scriptPath)
     {
         game = new(teams)
@@ -64,8 +66,14 @@ internal class MarbleGameView
 
     internal void Run()
     {
-        ConsoleColor originalColor = Console.ForegroundColor;
+        originalColor = Console.ForegroundColor;
+        Console.CancelKeyPress += Console_CancelKeyPress;
         game.Run();
+        Console.ForegroundColor = originalColor;
+    }
+
+    private void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+    {
         Console.ForegroundColor = originalColor;
     }
 
