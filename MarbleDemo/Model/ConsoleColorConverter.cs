@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using System.Text.Json;
 
-namespace Maiswan.Marble;
+namespace Maiswan.Marble.Demo;
 
 public class ConsoleColorConverter : JsonConverter<ConsoleColor>
 {

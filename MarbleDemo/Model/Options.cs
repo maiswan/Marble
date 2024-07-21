@@ -1,4 +1,4 @@
-﻿namespace Maiswan.Marble;
+﻿namespace Maiswan.Marble.Demo;
 
 public readonly struct Options
 {

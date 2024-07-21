@@ -1,4 +1,4 @@
-namespace Maiswan.Marble;
+namespace Maiswan.Marble.Demo;
 
 internal class MarbleGameView
 {
@@ -52,9 +52,14 @@ internal class MarbleGameView
 
     private ConsoleColor originalColor;
 
-    internal MarbleGameView(IEnumerable<Team> teams, string scriptPath)
+    private readonly IList<DemoTeam> teams;
+
+    internal MarbleGameView(IList<DemoTeam> teams, string scriptPath)
     {
-        game = new(teams)
+        this.teams = teams;
+        IEnumerable<Team> basicTeams = teams.Select((team, index) => new Team() { Id = index, Population = team.Population });
+
+        game = new(basicTeams)
         {
             DeathIfFewer = deathIfFewer,
             LuaFile = scriptPath,
@@ -98,7 +103,7 @@ internal class MarbleGameView
                 ? team.Population * 100d / e.TotalPopulation
                 : team.Population;
 
-            Console.ForegroundColor = team.Color;
+            Console.ForegroundColor = teams[team.Id].Color;
             Console.Write(writeFormat, output);
         }
 
@@ -129,8 +134,8 @@ internal class MarbleGameView
         Console.Write("Winning: ");
         foreach (Team team in winners)
         {
-            Console.ForegroundColor = team.Color;
-            Console.Write("{0} ", team.Name);
+            Console.ForegroundColor = teams[team.Id].Color;
+            Console.Write("{0} ", teams[team.Id].Name);
         }
     }
 }

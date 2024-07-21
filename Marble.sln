@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Marble", "Marble\Marble.csproj", "{8D842F43-41AE-4FA3-8047-05DC16B4F3C8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Marble", "Marble\Marble.csproj", "{8D842F43-41AE-4FA3-8047-05DC16B4F3C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarbleDemo", "MarbleDemo\MarbleDemo.csproj", "{E59F1CBF-2484-43C1-B438-BD6E144B2789}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{8D842F43-41AE-4FA3-8047-05DC16B4F3C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D842F43-41AE-4FA3-8047-05DC16B4F3C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D842F43-41AE-4FA3-8047-05DC16B4F3C8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E59F1CBF-2484-43C1-B438-BD6E144B2789}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E59F1CBF-2484-43C1-B438-BD6E144B2789}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E59F1CBF-2484-43C1-B438-BD6E144B2789}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E59F1CBF-2484-43C1-B438-BD6E144B2789}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace Maiswan.Marble;
+namespace Maiswan.Marble.Demo;
 
 internal class Program
 {
