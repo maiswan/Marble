@@ -1,21 +1,23 @@
 ﻿using NLua;
 using NLua.Exceptions;
+using System.Collections.Immutable;
 using System.Numerics;
 using System.Reflection;
 
 namespace Maiswan.Marble;
 
-public class MarbleGame(IEnumerable<Team> teams)
+public class MarbleGame(IEnumerable<TeamBase> teams)
 {
     public int DeathIfFewer { get; set; }
+
     public event EventHandler<MarbleGameChangedEventArgs>? GameStepped;
     public event EventHandler<MarbleGameChangedEventArgs>? GameEnded;
 
-    public int TotalPopulation => teams.Sum(x => x.Population);
-    public int TeamsAlive => teams.Count(x => x.Population != 0);
-    public IReadOnlyCollection<Team> Teams => teams.AsReadOnly();
 
-    private readonly List<Team> teams = new(teams);
+    private readonly List<TeamBase> teams = new(teams);
+    public int TotalPopulation => teams.Sum(x => x.Population);
+    public IImmutableList<TeamBase> Teams => teams.ToImmutableList();
+    public IImmutableList<TeamBase> AliveTeams => teams.Where(x => x.Population != 0).ToImmutableList();
 
     private int iteration;
 
@@ -68,7 +70,7 @@ public class MarbleGame(IEnumerable<Team> teams)
         {
             IsGameOver = isGameOver,
             Iteration = iteration,
-            Teams = teams,
+            Teams = Teams,
         };
         EventHandler<MarbleGameChangedEventArgs>? handler = isGameOver ? GameEnded : GameStepped;
         handler?.Invoke(this, e);
@@ -90,20 +92,10 @@ public class MarbleGame(IEnumerable<Team> teams)
 
     private void ForeachTeam<T>(Func<int, T, T, int> formula, T min, T max) where T : INumber<T>
     {
-        for (int i = 0; i < teams.Count; i++)
+        foreach (TeamBase team in teams)
         {
-            teams[i] = SetPopulation(
-                teams[i],
-                teams[i].Population == 0
-                    ? 0
-                    : formula(teams[i].Population, min, max)
-            );
+            team.Population = formula(team.Population, min, max);
         }
-    }
-    private Team SetPopulation(Team team, int population)
-    {
-        if (population < DeathIfFewer) { population = 0; }
-        return team with { PreviousPopulation = team.Population, Population = population };
     }
 
     public void Multiply(double min, double max)
@@ -123,10 +115,9 @@ public class MarbleGame(IEnumerable<Team> teams)
         ForeachTeam(AddFormula, min, max);
         CheckEnd();
     }
-
-    public void Set(int teamIndex, int population)
+    public void Set(TeamBase team, int population)
     {
-        teams[teamIndex] = SetPopulation(teams[teamIndex], population);
+        team.Population = population;
         CheckEnd();
     }
 }
