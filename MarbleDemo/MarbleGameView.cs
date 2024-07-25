@@ -52,14 +52,9 @@ internal class MarbleGameView
 
     private ConsoleColor originalColor;
 
-    private readonly IList<DemoTeam> teams;
-
     internal MarbleGameView(IList<DemoTeam> teams, string scriptPath)
     {
-        this.teams = teams;
-        IEnumerable<Team> basicTeams = teams.Select((team, index) => new Team() { Id = index, Population = team.Population });
-
-        game = new(basicTeams)
+        game = new(teams)
         {
             DeathIfFewer = deathIfFewer,
             LuaFile = scriptPath,
@@ -97,13 +92,13 @@ internal class MarbleGameView
         Console.ForegroundColor = ConsoleColor.Gray;
         Console.Write("#{0,3}", e.Iteration);
 
-        foreach (Team team in e.Teams)
+        foreach (TeamBase team in e.Teams)
         {
             double output = DisplayPercentage
                 ? team.Population * 100d / e.TotalPopulation
                 : team.Population;
 
-            Console.ForegroundColor = teams[team.Id].Color;
+            Console.ForegroundColor = ((DemoTeam)team).Color;
             Console.Write(writeFormat, output);
         }
 
@@ -129,13 +124,13 @@ internal class MarbleGameView
         Console.ForegroundColor = ConsoleColor.Gray;
 
         int max = e.Teams.Max(x => x.PreviousPopulation);
-        IEnumerable<Team> winners = e.Teams.Where(x => x.PreviousPopulation == max);
+        IEnumerable<TeamBase> winners = e.Teams.Where(x => x.PreviousPopulation == max);
 
         Console.Write("Winning: ");
-        foreach (Team team in winners)
+        foreach (TeamBase team in winners)
         {
-            Console.ForegroundColor = teams[team.Id].Color;
-            Console.Write("{0} ", teams[team.Id].Name);
+            Console.ForegroundColor = ((DemoTeam)team).Color;
+            Console.Write("{0} ", ((DemoTeam)team).Name);
         }
     }
 }

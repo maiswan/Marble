@@ -10,17 +10,17 @@ while true do
 	MarbleGame:Multiply(0.5, 0.9)
 
 	-- bonus
-	if MarbleGame.TeamsAlive >= 2 and MarbleGame.TeamsAlive <= 4 then
+	if MarbleGame.AliveTeams.Count >= 2 and MarbleGame.AliveTeams.Count <= 4 then
 		repeat
 			index = math.random(0, MarbleGame.Teams.Count - 1)
 		until MarbleGame.Teams[index].Population ~= 0 and index ~= lastIndex
 
-		MarbleGame:Set(index, MarbleGame.Teams[index].Population * 2)
+		MarbleGame:Set(MarbleGame.Teams[index], MarbleGame.Teams[index].Population * 2)
 		lastIndex = index
 	end
 
 	-- end game quicker
-	if MarbleGame.TeamsAlive == 1 then
+	if MarbleGame.AliveTeams.Count == 1 then
 		MarbleGame:Multiply(0.5, 1.0)
 	end
 end
