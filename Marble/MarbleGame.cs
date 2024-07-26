@@ -90,7 +90,7 @@ public class MarbleGame(IEnumerable<TeamBase> teams)
         lua.State.Error();
     }
 
-    private void ForeachTeam<T>(Func<int, T, T, int> formula, T min, T max) where T : INumber<T>
+    private static void ForeachTeam<T>(Func<int, T, T, int> formula, T min, T max, IEnumerable<TeamBase> teams) where T : INumber<T>
     {
         foreach (TeamBase team in teams)
         {
@@ -98,26 +98,37 @@ public class MarbleGame(IEnumerable<TeamBase> teams)
         }
     }
 
-    public void Multiply(double min, double max)
+    public void Multiply(double rate, params TeamBase[] teams) => Multiply(rate, rate, teams);
+    public void Multiply(double min, double max, params TeamBase[] teams)
     {
         static int MultiplyFormula(int population, double min, double max)
             => (int)(population * Random.Shared.NextDouble(min, max));
 
-        ForeachTeam(MultiplyFormula, min, max);
+        IEnumerable<TeamBase> targets = teams.Length == 0 ? this.teams : teams;
+        ForeachTeam(MultiplyFormula, min, max, targets);
         CheckEnd();
     }
 
-    public void Add(int min, int max)
+
+    public void Add(int amount, params TeamBase[] teams) => Add(amount, amount, teams);
+    public void Add(int min, int max, params TeamBase[] teams)
     {
         static int AddFormula(int population, int min, int max)
             => population + Random.Shared.Next(min, max);
 
-        ForeachTeam(AddFormula, min, max);
+        IEnumerable<TeamBase> targets = teams.Length == 0 ? this.teams : teams;
+        ForeachTeam(AddFormula, min, max, targets);
         CheckEnd();
     }
-    public void Set(TeamBase team, int population)
+
+    public void Set(int amount, params TeamBase[] teams) => Set(amount, amount, teams);
+    public void Set(int min, int max, params TeamBase[] teams)
     {
-        team.Population = population;
+        static int SetFormula(int population, int min, int max)
+            => Random.Shared.Next(min, max);
+
+        IEnumerable<TeamBase> targets = teams.Length == 0 ? this.teams : teams;
+        ForeachTeam(SetFormula, min, max, targets);
         CheckEnd();
     }
 }
