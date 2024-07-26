@@ -1,26 +1,25 @@
-lastIndex = -1
-index = -1
-
 for i = 0,4,1 do
-	MarbleGame:Multiply(0.8, 1.2)
+	MarbleGame:Multiply(0.8, 1.5)
 end
 
 while true do
-	MarbleGame:Multiply(1.0, 1.2)
-	MarbleGame:Multiply(0.5, 0.9)
+	MarbleGame:Multiply(0.7, 1.1)
 
 	-- bonus
-	if MarbleGame.AliveTeams.Count >= 2 and MarbleGame.AliveTeams.Count <= 4 then
-		repeat
-			index = math.random(0, MarbleGame.Teams.Count - 1)
-		until MarbleGame.Teams[index].Population ~= 0 and index ~= lastIndex
+	if MarbleGame.AliveTeams.Count >= 2 and MarbleGame.TotalPopulation <= 100 then
+		local index = math.random(0, MarbleGame.Teams.Count - 1)
+		MarbleGame:Multiply(1.5, 2.0 + MarbleGame.Teams[index].Population / MarbleGame.TotalPopulation, MarbleGame.Teams[index])
+	end
 
-		MarbleGame:Set(MarbleGame.Teams[index], MarbleGame.Teams[index].Population * 2)
-		lastIndex = index
+	-- tenbatsu
+	local draw = math.random()
+	if draw <= 0.04 then
+		local index = math.random(MarbleGame.AliveTeams.Count - 1)
+		MarbleGame:Set(5, 10, MarbleGame.AliveTeams[index])
 	end
 
 	-- end game quicker
 	if MarbleGame.AliveTeams.Count == 1 then
-		MarbleGame:Multiply(0.5, 1.0)
+		MarbleGame:Multiply(0.4, 1.0)
 	end
 end
