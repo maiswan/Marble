@@ -1,3 +1,7 @@
+using NLua;
+using NLua.Exceptions;
+using System.Reflection;
+
 namespace Maiswan.Marble.Demo;
 
 internal class MarbleGameView
@@ -52,23 +56,58 @@ internal class MarbleGameView
 
     private ConsoleColor originalColor;
 
+    private readonly Lua lua = new();
+
+    private readonly string luaFile;
+
     internal MarbleGameView(IList<DemoTeam> teams, string scriptPath)
     {
         game = new(teams)
         {
             DeathIfFewer = deathIfFewer,
-            LuaFile = scriptPath,
         };
         game.GameStepped += OnGameStepped;
         game.GameEnded += OnGameEnded;
         UpdateWriteFormat();
+
+        luaFile = scriptPath;
+    }
+    
+    private void InitializeLuaSandbox()
+    {
+        lua["MarbleGame"] = game;
+    
+        // Execute Sandbox.lua as an embdded resource
+        Assembly executing = Assembly.GetExecutingAssembly();
+        string? name = executing.GetName().Name;
+
+        using Stream? stream = executing.GetManifestResourceStream($"{name}.Sandbox.lua");
+        if (stream is null) { throw new IOException(nameof(stream)); }
+    
+        StreamReader streamReader = new(stream);
+        string sandbox = streamReader.ReadToEnd();
+        lua.DoString(sandbox);
+    }
+    
+    private void InvokeLua()
+    {
+        string user = File.ReadAllText(luaFile);
+        LuaFunction sandbox = (LuaFunction)lua["run_sandbox"];
+        sandbox.Call(user);
     }
 
     internal void Run()
     {
         originalColor = Console.ForegroundColor;
         Console.CancelKeyPress += Console_CancelKeyPress;
-        game.Run();
+
+        try
+        {
+            InitializeLuaSandbox();
+            InvokeLua();
+        }
+        catch (LuaException) { }
+
         Console.ForegroundColor = originalColor;
     }
 
@@ -132,5 +171,8 @@ internal class MarbleGameView
             Console.ForegroundColor = ((DemoTeam)team).Color;
             Console.Write("{0} ", ((DemoTeam)team).Name);
         }
+
+        // Halt script
+        lua.State.Error();
     }
 }
