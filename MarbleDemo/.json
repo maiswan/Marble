@@ -1,10 +1,10 @@
 {
   "Options": {
-    "DelayBetweenRounds": 150,
+    "DelayBetweenRounds": 0,
     "DisplayPercentage": false,
     "DisplayZero": false,
     "DeathIfFewer": 3,
-    "ScriptPath": ".lua"
+    "ScriptPath": ".csx"
   },
 
   "Teams": [

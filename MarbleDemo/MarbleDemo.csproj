@@ -5,22 +5,12 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>Marble.Demo</AssemblyName>
-    <RootNamespace>Marble.Demo</RootNamespace>
+    <AssemblyName>Maiswan.Marble.Demo</AssemblyName>
+    <RootNamespace>Maiswan.Marble.Demo</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Sandbox.lua" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Sandbox.lua">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="NLua" Version="1.7.3" />
+    <PackageReference Include="CS-Script" Version="4.8.17" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,11 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update=".json">
+    <None Update=".csx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update=".lua">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Update=".json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
