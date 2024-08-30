@@ -16,24 +16,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Sandbox.lua" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Sandbox.lua">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="..\README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="NLua" Version="1.7.3" />
   </ItemGroup>
 
 </Project>

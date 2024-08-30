@@ -2,7 +2,7 @@
 
 public record class ConfigRoot
 {
-    public Options Options { get; set; } = new();
+    public MarbleGameOptions Options { get; set; }
 
     public List<DemoTeam> Teams { get; set; } = [];
 }

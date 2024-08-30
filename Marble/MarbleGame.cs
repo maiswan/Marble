@@ -1,8 +1,4 @@
-﻿using NLua;
-using NLua.Exceptions;
-using System.Collections.Immutable;
-using System.Numerics;
-using System.Reflection;
+﻿using System.Numerics;
 
 namespace Maiswan.Marble;
 
@@ -13,122 +9,207 @@ public class MarbleGame(IEnumerable<TeamBase> teams)
     public event EventHandler<MarbleGameChangedEventArgs>? GameStepped;
     public event EventHandler<MarbleGameChangedEventArgs>? GameEnded;
 
-
     private readonly List<TeamBase> teams = new(teams);
+
     public int TotalPopulation => teams.Sum(x => x.Population);
-    public IImmutableList<TeamBase> Teams => teams.ToImmutableList();
-    public IImmutableList<TeamBase> AliveTeams => teams.Where(x => x.Population != 0).ToImmutableList();
+    public bool IsGameOver => TotalPopulation == 0;
 
-    private int iteration;
+    public IReadOnlyList<TeamBase> Teams => teams[..];
+    public IReadOnlyList<TeamBase> AliveTeams => teams.Where(x => x.Population != 0).ToList();
 
-    private readonly Lua lua = new();
-    public string LuaFile { get; init; } = "";
+    public int Iteration { get; private set; }
 
-    public void Run()
+    #region Auxiliary
+
+    private void Stepped()
     {
-        if (lua.IsExecuting) { return; }
+        Iteration++;
 
-        RaiseGameChangedEvent(false);
-
-        // Invoke user script through sandbox
-        try
-        {
-            InitializeLuaSandbox();
-            InvokeLua();
-        }
-        catch ( LuaException ) { }
-
-        RaiseGameChangedEvent(true);
+        ZeroDyingTeams();
+        RaiseEvent();
     }
 
-    private void InitializeLuaSandbox()
-    {
-        lua["MarbleGame"] = this;
-
-        // Execute Sandbox.lua as an embdded resource
-        Assembly executing = Assembly.GetExecutingAssembly();
-        string? name = executing.GetName().Name;
-
-        using Stream? stream = executing.GetManifestResourceStream($"{name}.Sandbox.lua");
-        if (stream is null) { throw new IOException(nameof(stream)); }
-
-        StreamReader streamReader = new(stream);
-        string sandbox = streamReader.ReadToEnd();
-        lua.DoString(sandbox);
-    }
-
-    private void InvokeLua()
-    {
-        string user = File.ReadAllText(LuaFile);
-        LuaFunction sandbox = (LuaFunction)lua["run_sandbox"];
-        sandbox.Call(user);
-    }
-
-    private void RaiseGameChangedEvent(bool isGameOver)
-    {
-        MarbleGameChangedEventArgs e = new()
-        {
-            IsGameOver = isGameOver,
-            Iteration = iteration,
-            Teams = Teams,
-        };
-        EventHandler<MarbleGameChangedEventArgs>? handler = isGameOver ? GameEnded : GameStepped;
-        handler?.Invoke(this, e);
-    }
-
-    private void CheckEnd()
-    {
-        iteration++;
-
-        if (teams.Any(x => x.Population != 0))
-        {
-            RaiseGameChangedEvent(false);
-            return;
-        }
-
-        // Halt the script via an exception
-        lua.State.Error();
-    }
-
-    private static void ForeachTeam<T>(Func<int, T, T, int> formula, T min, T max, IEnumerable<TeamBase> teams) where T : INumber<T>
+    private void ZeroDyingTeams()
     {
         foreach (TeamBase team in teams)
         {
-            team.Population = formula(team.Population, min, max);
+            if (team.Population < DeathIfFewer) { team.Population = 0; }
         }
     }
 
-    public void Multiply(double rate, params TeamBase[] teams) => Multiply(rate, rate, teams);
-    public void Multiply(double min, double max, params TeamBase[] teams)
+    private void RaiseEvent()
     {
-        static int MultiplyFormula(int population, double min, double max)
-            => (int)(population * Random.Shared.NextDouble(min, max));
+        MarbleGameChangedEventArgs e = new()
+        {
+            Iteration = Iteration,
+            Teams = Teams,
+        };
+        GameStepped?.Invoke(this, e);
 
-        IEnumerable<TeamBase> targets = teams.Length == 0 ? this.teams : teams;
-        ForeachTeam(MultiplyFormula, min, max, targets);
-        CheckEnd();
+        if (!IsGameOver) { return; }
+        GameEnded?.Invoke(this, e);
     }
 
-
-    public void Add(int amount, params TeamBase[] teams) => Add(amount, amount, teams);
-    public void Add(int min, int max, params TeamBase[] teams)
+    private void ForeachTeam<T>(Func<int, T, int> formula, T parameter, IEnumerable<TeamBase>? targets) where T : INumber<T>
     {
-        static int AddFormula(int population, int min, int max)
-            => population + Random.Shared.Next(min, max);
+        targets ??= AliveTeams;
 
-        IEnumerable<TeamBase> targets = teams.Length == 0 ? this.teams : teams;
-        ForeachTeam(AddFormula, min, max, targets);
-        CheckEnd();
+        foreach (TeamBase target in targets)
+        {
+            int population = formula(target.Population, parameter);
+            target.Population = population >= DeathIfFewer ? population : 0;
+        }
+
+        Stepped();
     }
 
-    public void Set(int amount, params TeamBase[] teams) => Set(amount, amount, teams);
-    public void Set(int min, int max, params TeamBase[] teams)
+    private void ForeachTeam<T>(Func<int, T, T, int> formula, T parameter1, T parameter2, IEnumerable<TeamBase>? targets) where T : INumber<T>
+    {
+        targets ??= AliveTeams;
+
+        foreach (TeamBase target in targets)
+        {
+            target.Population = formula(target.Population, parameter1, parameter2);
+        }
+
+        Stepped();
+    }
+
+    #endregion Auxiliary
+
+    #region Methods
+
+    public void Multiply(double rate, IEnumerable<TeamBase>? targets = null)
+    {
+        static int MultiplyFormula(int population, double rate)
+            => (int)(population * rate);
+
+        ForeachTeam(MultiplyFormula, rate, targets);
+    }
+
+    public void Multiply(double min, double max, IEnumerable<TeamBase>? targets = null)
+    {
+         static int MultiplyFormula(int population, double min, double max)
+             => (int)(population * Random.Shared.NextDouble(min, max));
+     
+         ForeachTeam(MultiplyFormula, min, max, targets);
+    }
+
+    public void MultiplyWithMeanAndStdev(double mean, double stdev, IEnumerable<TeamBase>? targets = null)
+    {
+        targets ??= AliveTeams;
+
+        IEnumerable<double> rates = Random.Shared.NextDoubles(mean, stdev, targets.Count());
+
+        foreach (var (target, rate) in Enumerable.Zip(targets, rates))
+        {
+            target.Population = (int)(target.Population * rate);
+        }
+
+        Stepped();
+    }
+
+    public void Add(int amount, IEnumerable<TeamBase>? targets = null)
+    {
+        static int AdditionFormula(int population, int amount)
+            => population + amount;
+
+        ForeachTeam(AdditionFormula, amount, targets);
+    }
+
+    public void Add(int min, int max, IEnumerable<TeamBase>? targets = null)
+    {
+        static int AdditionFormula(int population, int min, int max) => population + Random.Shared.Next(min, max);
+
+        ForeachTeam(AdditionFormula, min, max, targets);
+    }
+
+    public void AddWithMeanAndStdev(double mean, double stdev, IEnumerable<TeamBase>? targets = null)
+    {
+        targets ??= AliveTeams;
+
+        IEnumerable<int> rates = Random.Shared.NextInts(mean, stdev, targets.Count());
+
+        foreach (var (target, rate) in Enumerable.Zip(targets, rates))
+        {
+            target.Population += rate;
+        }
+
+        Stepped();
+    }
+
+    public void Set(int amount, IEnumerable<TeamBase>? targets = null)
+    {
+        static int SetFormula(int population, int amount)
+            => amount;
+
+        ForeachTeam(SetFormula, amount, targets);
+    }
+
+    public void Set(int min, int max, IEnumerable<TeamBase>? targets = null)
     {
         static int SetFormula(int population, int min, int max)
             => Random.Shared.Next(min, max);
 
-        IEnumerable<TeamBase> targets = teams.Length == 0 ? this.teams : teams;
         ForeachTeam(SetFormula, min, max, targets);
-        CheckEnd();
     }
+
+    public void SetWithMeanAndStdev(double mean, double stdev, IEnumerable<TeamBase>? targets = null)
+    {
+        targets ??= AliveTeams;
+
+        IEnumerable<int> amounts = Random.Shared.NextInts(mean, stdev, targets.Count());
+
+        foreach (var (target, amount) in Enumerable.Zip(targets, amounts))
+        {
+            target.Population = amount;
+        }
+
+        Stepped();
+    }
+
+    public void Swap(TeamBase a, TeamBase b)
+    {
+        (a.Population, b.Population) = (b.Population, a.Population);
+        Stepped();
+    }
+
+    public void Shuffle(IEnumerable<TeamBase>? targets = null)
+    {
+        List<TeamBase> teams = new(targets ?? AliveTeams); 
+
+        for (int i = 0; i < teams.Count - 2; i++)
+        {
+            int j = Random.Shared.Next(i, teams.Count);
+            TeamBase a = teams[i];
+            TeamBase b = teams[j];
+
+            (a.Population, b.Population) = (b.Population, a.Population);
+        }
+
+        Stepped();
+    }
+    #endregion Methods
+
+    #region params overloads
+
+    public void Multiply(double rate, params TeamBase[] targets)
+        => Multiply(rate, targets.AsEnumerable());
+
+    public void Multiply(double min, double max, params TeamBase[] targets)
+        => Multiply(min, max, targets.AsEnumerable());
+
+    public void Add(int amount, params TeamBase[] targets)
+        => Add(amount, targets.AsEnumerable());
+
+    public void Add(int min, int max, params TeamBase[] targets)
+        => Add(min, max, targets.AsEnumerable());
+
+    public void Set(int amount, params TeamBase[] targets)
+        => Set(amount, targets.AsEnumerable());
+
+    public void Set(int min, int max, params TeamBase[] targets)
+        => Set(min, max, targets.AsEnumerable());
+
+    #endregion params overloads
 }
