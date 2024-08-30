@@ -87,11 +87,11 @@ public class MarbleGame(IEnumerable<TeamBase> teams)
 		Stepped();
 	}
 
-    #endregion Auxiliary
+	#endregion Auxiliary
 
-    #region Methods
+	#region Methods
 
-    public void Multiply(double rate, IEnumerable<TeamBase>? targets = null)
+	public void Multiply(double rate, IEnumerable<TeamBase>? targets = null)
     {
         static int MultiplyFormula(int population, double rate)
             => (int)(population * rate);
@@ -108,17 +108,14 @@ public class MarbleGame(IEnumerable<TeamBase> teams)
     }
 
     public void MultiplyWithMeanAndStdev(double mean, double stdev, IEnumerable<TeamBase>? targets = null)
-    {
+	{
 		static int MultiplyFormula(int population, double rate)
 			=> (int)(population * rate);
 
 		targets ??= AliveTeams;
-        IEnumerable<double> rates = Random.Shared.NextDoubles(mean, stdev, targets.Count());
+		IEnumerable<double> rates = Random.Shared.NextDoubles(mean, stdev, targets.Count());
 
         ForeachTeam(MultiplyFormula, rates, targets);
-        }
-
-        Stepped();
     }
 
     public void Add(int amount, IEnumerable<TeamBase>? targets = null)
@@ -142,13 +139,10 @@ public class MarbleGame(IEnumerable<TeamBase> teams)
 		static int AdditionFormula(int population, int amount)
 			=> population + amount;
 
-        targets ??= AliveTeams;
+		targets ??= AliveTeams;
 		IEnumerable<int> amounts = Random.Shared.NextInts(mean, stdev, targets.Count());
 
 		ForeachTeam(AdditionFormula, amounts, targets);
-        }
-
-        Stepped();
     }
 
     public void Set(int amount, IEnumerable<TeamBase>? targets = null)
@@ -173,14 +167,9 @@ public class MarbleGame(IEnumerable<TeamBase> teams)
 			=> amount;
 
 		targets ??= AliveTeams;
-        IEnumerable<int> amounts = Random.Shared.NextInts(mean, stdev, targets.Count());
+		IEnumerable<int> amounts = Random.Shared.NextInts(mean, stdev, targets.Count());
 
 		ForeachTeam(SetFormula, amounts, targets);
-        {
-            target.Population = amount;
-        }
-
-        Stepped();
     }
 
     public void Swap(TeamBase a, TeamBase b)
@@ -214,17 +203,26 @@ public class MarbleGame(IEnumerable<TeamBase> teams)
     public void Multiply(double min, double max, params TeamBase[] targets)
         => Multiply(min, max, targets.AsEnumerable());
 
-    public void Add(int amount, params TeamBase[] targets)
+	public void MultiplyWithMeanAndStdev(double mean, double stdev, params TeamBase[] targets)
+		=> MultiplyWithMeanAndStdev(mean, stdev, targets.AsEnumerable());
+
+	public void Add(int amount, params TeamBase[] targets)
         => Add(amount, targets.AsEnumerable());
 
     public void Add(int min, int max, params TeamBase[] targets)
         => Add(min, max, targets.AsEnumerable());
 
-    public void Set(int amount, params TeamBase[] targets)
+	public void AddWithMeanAndStdev(double mean, double stdev, params TeamBase[] targets)
+		=> AddWithMeanAndStdev(mean, stdev, targets.AsEnumerable());
+
+	public void Set(int amount, params TeamBase[] targets)
         => Set(amount, targets.AsEnumerable());
 
     public void Set(int min, int max, params TeamBase[] targets)
         => Set(min, max, targets.AsEnumerable());
 
-    #endregion params overloads
+	public void SetWithMeanAndStdev(double mean, double stdev, params TeamBase[] targets)
+		=> SetWithMeanAndStdev(mean, stdev, targets.AsEnumerable());
+
+	#endregion params overloads
 }
