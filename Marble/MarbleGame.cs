@@ -75,6 +75,18 @@ public class MarbleGame(IEnumerable<TeamBase> teams)
         Stepped();
     }
 
+	private void ForeachTeam<T>(Func<int, T, int> formula, IEnumerable<T> values, IEnumerable<TeamBase>? targets) where T : INumber<T>
+	{
+		targets ??= AliveTeams;
+
+		foreach (var (target, value) in Enumerable.Zip(targets, values))
+		{
+            target.Population = formula(target.Population, value);
+		}
+
+		Stepped();
+	}
+
     #endregion Auxiliary
 
     #region Methods
@@ -97,13 +109,13 @@ public class MarbleGame(IEnumerable<TeamBase> teams)
 
     public void MultiplyWithMeanAndStdev(double mean, double stdev, IEnumerable<TeamBase>? targets = null)
     {
-        targets ??= AliveTeams;
+		static int MultiplyFormula(int population, double rate)
+			=> (int)(population * rate);
 
+		targets ??= AliveTeams;
         IEnumerable<double> rates = Random.Shared.NextDoubles(mean, stdev, targets.Count());
 
-        foreach (var (target, rate) in Enumerable.Zip(targets, rates))
-        {
-            target.Population = (int)(target.Population * rate);
+        ForeachTeam(MultiplyFormula, rates, targets);
         }
 
         Stepped();
@@ -119,20 +131,21 @@ public class MarbleGame(IEnumerable<TeamBase> teams)
 
     public void Add(int min, int max, IEnumerable<TeamBase>? targets = null)
     {
-        static int AdditionFormula(int population, int min, int max) => population + Random.Shared.Next(min, max);
+        static int AdditionFormula(int population, int min, int max)
+            => population + Random.Shared.Next(min, max);
 
         ForeachTeam(AdditionFormula, min, max, targets);
     }
 
     public void AddWithMeanAndStdev(double mean, double stdev, IEnumerable<TeamBase>? targets = null)
     {
+		static int AdditionFormula(int population, int amount)
+			=> population + amount;
+
         targets ??= AliveTeams;
+		IEnumerable<int> amounts = Random.Shared.NextInts(mean, stdev, targets.Count());
 
-        IEnumerable<int> rates = Random.Shared.NextInts(mean, stdev, targets.Count());
-
-        foreach (var (target, rate) in Enumerable.Zip(targets, rates))
-        {
-            target.Population += rate;
+		ForeachTeam(AdditionFormula, amounts, targets);
         }
 
         Stepped();
@@ -156,11 +169,13 @@ public class MarbleGame(IEnumerable<TeamBase> teams)
 
     public void SetWithMeanAndStdev(double mean, double stdev, IEnumerable<TeamBase>? targets = null)
     {
-        targets ??= AliveTeams;
+		static int SetFormula(int population, int amount)
+			=> amount;
 
+		targets ??= AliveTeams;
         IEnumerable<int> amounts = Random.Shared.NextInts(mean, stdev, targets.Count());
 
-        foreach (var (target, amount) in Enumerable.Zip(targets, amounts))
+		ForeachTeam(SetFormula, amounts, targets);
         {
             target.Population = amount;
         }
