@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace Maiswan.Marble;
+namespace Maiswan.Marble.Demo;
 
 internal class Program
 {
@@ -29,12 +29,6 @@ internal class Program
         string path = GetJsonPath(args);
         ConfigRoot config = GetConfigFromJsonPath(path);
 
-        new MarbleGameView(config.Teams, config.Options.ScriptPath)
-        {
-            DeathIfFewer = config.Options.DeathIfFewer,
-            DelayBetweenRounds = config.Options.DelayBetweenRounds,
-            DisplayPercentage = config.Options.DisplayPercentage,
-            DisplayZero = config.Options.DisplayZero,
-        }.Run();
+        new MarbleGameController(config.Teams, config.Options).Run();
     }
 }

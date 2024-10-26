@@ -1,6 +1,6 @@
-﻿namespace Maiswan.Marble;
+﻿namespace Maiswan.Marble.Demo;
 
-public readonly struct Options
+public readonly struct MarbleGameOptions
 {
     public int DelayBetweenRounds { get; init; }
     public bool DisplayPercentage { get; init; }
@@ -8,6 +8,6 @@ public readonly struct Options
     public int DeathIfFewer { get; init; }
     public string ScriptPath { get; init; } = "";
 
-    public Options()
+    public MarbleGameOptions()
     { }
 }
